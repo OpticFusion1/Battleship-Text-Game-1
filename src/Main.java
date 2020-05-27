@@ -14,8 +14,8 @@ public class Main {
 
         ArrayList<Ship> ships = new ArrayList<Ship>();
         ArrayList<Ship> shipsE = new ArrayList<Ship>();
-        ArrayList<String> guessedCoord = new ArrayList<String>();
-        ArrayList<String> guessedCoordE = new ArrayList<String>();
+        ArrayList<Coordinate> guessedCoord = new ArrayList<Coordinate>();
+        ArrayList<Coordinate> guessedCoordE = new ArrayList<Coordinate>();
         ArrayList<Coordinate> correctCoordE = new ArrayList<Coordinate>();
         ArrayList<String> usedCoord = new ArrayList<String>();
         ArrayList<String> usedCoordE = new ArrayList<String>();
@@ -171,12 +171,18 @@ public class Main {
 
             System.out.println("[PRESS ENTER TO CONTINUE]");
             scan.nextLine();
+            **/
 
-             **/
 
             //Enemy turn
-            enemyTurn(grid, ships, guessedCoordE, correctCoordE);
-            showGrid(grid);
+
+            //EnemyAI debugging loop
+            for(int i = 1; i <= 5; i++){
+                System.out.println("<<Turn: "+i+">>");
+                enemyTurn(grid, ships, guessedCoordE, correctCoordE);
+                showGrid(grid);
+            }
+
             playing = false;
         }
     }
@@ -214,6 +220,38 @@ public class Main {
 
     public static void setSymbol(String[][] grid, int letter, int num, String symbol){
          grid[letter][num] = symbol;
+    }
+
+    public static String[] shipInfo(String input){
+        String[] info = new String[3];
+
+        String direction = "";
+        int commaIndex = input.indexOf(",");
+        String coord1 = input.substring(0, commaIndex);
+        String coord2 = input.substring(commaIndex+1);
+
+//        System.out.println("Coord1: "+coord1);
+//        System.out.println("Coord2: "+coord2);
+//        System.out.println("Coord1 letter: "+coord1.substring(0,1));
+//        System.out.println("Coord1 num: "+coord1.substring(1));
+//        System.out.println("Coord2 letter: "+coord2.substring(0,1));
+//        System.out.println("Coord2 num: "+coord2.substring(1));
+
+        //Checks if ship is horizontal or vertical
+        if(coord1.substring(0,1).equals(coord2.substring(0,1))){
+            direction = "horizontal";
+        }else if(coord1.substring(1).equals(coord2.substring(1))){
+            direction = "vertical";
+        }else{
+            direction = "illegal";
+        }
+
+        info[0] = coord1;
+        info[1] = coord2;
+        info[2] = direction;
+
+        //coordinate 1, coordinate 2, direction
+        return info;
     }
 
     public static boolean checkShip(String input, int length, ArrayList<String> used){
@@ -290,54 +328,6 @@ public class Main {
 
     }
 
-    public static ArrayList<String> returnCoordinates(String input, ArrayList<String> used){
-        String[] info = shipInfo(input);
-        ArrayList<String> coordinates = new ArrayList<String>();
-
-        //Add all coordinates of the ship
-        if(info[2].equals("horizontal")){
-            //System.out.println("horizontal");
-            String letter = info[0].substring(0,1);
-            int num1 = Integer.parseInt(info[0].substring(1));
-            int num2 = Integer.parseInt(info[1].substring(1));
-
-            int smallNum = num1;
-            int bigNum = num2;
-
-            if(num1 > num2){
-                smallNum = num2;
-                bigNum = num1;
-            }
-
-            for(int i = smallNum; i <= bigNum; i++){
-                coordinates.add(letter+i);
-            }
-            //System.out.println(coordinates);
-        }
-
-        if(info[2].equals("vertical")){
-            //System.out.println("vertical");
-            int letter1 = alphabet.indexOf(info[0].substring(0,1));
-            int letter2 = alphabet.indexOf(info[1].substring(0,1));
-            int num = Integer.parseInt(info[0].substring(1));
-
-            int smallLetter = letter1;
-            int bigLetter = letter2;
-
-            if(letter1 > letter2){
-                smallLetter = letter2;
-                bigLetter = letter1;
-            }
-
-            for(int i = smallLetter; i <= bigLetter; i++){
-                coordinates.add(Character.toString(alphabet.charAt(i))+num);
-            }
-            //System.out.println(coordinates);
-        }
-
-        return coordinates;
-    }
-
     public static Ship createShip(String input, String[][] grid, ArrayList<String> used){
         String[] info = shipInfo(input);
         ArrayList<String> coordinates = returnCoordinates(input, used);
@@ -353,38 +343,6 @@ public class Main {
         return new Ship(info[2], coordinates);
     }
 
-    public static String[] shipInfo(String input){
-        String[] info = new String[3];
-
-        String direction = "";
-        int commaIndex = input.indexOf(",");
-        String coord1 = input.substring(0, commaIndex);
-        String coord2 = input.substring(commaIndex+1);
-
-//        System.out.println("Coord1: "+coord1);
-//        System.out.println("Coord2: "+coord2);
-//        System.out.println("Coord1 letter: "+coord1.substring(0,1));
-//        System.out.println("Coord1 num: "+coord1.substring(1));
-//        System.out.println("Coord2 letter: "+coord2.substring(0,1));
-//        System.out.println("Coord2 num: "+coord2.substring(1));
-
-        //Checks if ship is horizontal or vertical
-        if(coord1.substring(0,1).equals(coord2.substring(0,1))){
-            direction = "horizontal";
-        }else if(coord1.substring(1).equals(coord2.substring(1))){
-            direction = "vertical";
-        }else{
-            direction = "illegal";
-        }
-
-        info[0] = coord1;
-        info[1] = coord2;
-        info[2] = direction;
-
-        //coordinate 1, coordinate 2, direction
-        return info;
-    }
-
     public static Ship randomizeEnemyShip(String[][] grid, int length, ArrayList<String > used){
         boolean randomizing = true;
         int randLetter = 0;
@@ -395,12 +353,14 @@ public class Main {
         while(randomizing){
             int[] randomCoordinate = randomCoordinate();
 
+            Coordinate randCoord = new Coordinate(randomCoordinate[0], randomCoordinate[1]);
+
             randLetter = randomCoordinate[0];
             randNum = randomCoordinate[1];
 
             boolean checkPassed = false;
 
-            ArrayList<String> possibleDirections = getDirections(randLetter, randNum);
+            ArrayList<String> possibleDirections = randCoord.getDirections(randLetter, randNum);
 
 //        System.out.println("randLetter: "+randLetter);
 //        System.out.println("randNum: "+randNum);
@@ -452,6 +412,54 @@ public class Main {
         return createShip(getInput(randLetter, randNum, randDir, length), grid, used);
     }
 
+    public static ArrayList<String> returnCoordinates(String input, ArrayList<String> used){
+        String[] info = shipInfo(input);
+        ArrayList<String> coordinates = new ArrayList<String>();
+
+        //Add all coordinates of the ship
+        if(info[2].equals("horizontal")){
+            //System.out.println("horizontal");
+            String letter = info[0].substring(0,1);
+            int num1 = Integer.parseInt(info[0].substring(1));
+            int num2 = Integer.parseInt(info[1].substring(1));
+
+            int smallNum = num1;
+            int bigNum = num2;
+
+            if(num1 > num2){
+                smallNum = num2;
+                bigNum = num1;
+            }
+
+            for(int i = smallNum; i <= bigNum; i++){
+                coordinates.add(letter+i);
+            }
+            //System.out.println(coordinates);
+        }
+
+        if(info[2].equals("vertical")){
+            //System.out.println("vertical");
+            int letter1 = alphabet.indexOf(info[0].substring(0,1));
+            int letter2 = alphabet.indexOf(info[1].substring(0,1));
+            int num = Integer.parseInt(info[0].substring(1));
+
+            int smallLetter = letter1;
+            int bigLetter = letter2;
+
+            if(letter1 > letter2){
+                smallLetter = letter2;
+                bigLetter = letter1;
+            }
+
+            for(int i = smallLetter; i <= bigLetter; i++){
+                coordinates.add(Character.toString(alphabet.charAt(i))+num);
+            }
+            //System.out.println(coordinates);
+        }
+
+        return coordinates;
+    }
+
     public static int[] randomCoordinate(){
         int[] randCoordinate = new int[2];
 
@@ -461,64 +469,6 @@ public class Main {
 
 
         return randCoordinate;
-    }
-
-    public static ArrayList<String> getDirections(int randLetter, int randNum){
-        ArrayList<String> possibleDirections = new ArrayList<String>();
-
-        if(randLetter != 0 && randLetter != 9 && randNum != 0 && randNum != 9){
-            //System.out.println("Coordinate is in the middle");
-
-            possibleDirections.add("up");
-            possibleDirections.add("down");
-            possibleDirections.add("left");
-            possibleDirections.add("right");
-        }else if(randLetter != randNum && Math.abs(randLetter - randNum) != 9){
-            //System.out.println("Coordinate on the edge but not a corner");
-
-            if(randNum == 0){
-
-                possibleDirections.add("up");
-                possibleDirections.add("right");
-                possibleDirections.add("down");
-            }
-            if(randNum == 9){
-                possibleDirections.add("up");
-                possibleDirections.add("left");
-                possibleDirections.add("down");
-            }
-            if(randLetter == 0){
-                possibleDirections.add("left");
-                possibleDirections.add("right");
-                possibleDirections.add("down");
-            }
-            if(randLetter == 9){
-                possibleDirections.add("left");
-                possibleDirections.add("right");
-                possibleDirections.add("up");
-            }
-        }else{
-            //System.out.println("Coordinate is a corner");
-
-            if(randLetter == 0 && randNum == 0){
-                possibleDirections.add("right");
-                possibleDirections.add("down");
-            }
-            if(randLetter == 0 && randNum == 9){
-                possibleDirections.add("left");
-                possibleDirections.add("down");
-            }
-            if(randLetter == 9 && randNum == 0){
-                possibleDirections.add("up");
-                possibleDirections.add("right");
-            }
-            if(randLetter == 9 && randNum == 9){
-                possibleDirections.add("up");
-                possibleDirections.add("left");
-            }
-        }
-
-        return possibleDirections;
     }
 
     public static String getInput(int randLetter, int randNum, String randDir, int length){
@@ -554,21 +504,21 @@ public class Main {
         return letter1+num1+","+letter2+num2;
     }
 
-    public static String checkGuess(String guess, String[][] gridE, String[][] gridH, ArrayList<Ship> ships, ArrayList<String> gCoord){
+    public static String checkGuess(String guess, String[][] gridE, String[][] gridH, ArrayList<Ship> ships, ArrayList<Coordinate> gCoord){
 
         guess = guess.toUpperCase();
 
         int letter = alphabet.indexOf(guess.substring(0,1));
         int num = Integer.parseInt(guess.substring(1));
 
-//        System.out.println("Letter: "+letter);
-//        System.out.println("Num: "+num);
-//        System.out.println("Guess: "+guess);
+        System.out.println("Letter: "+letter);
+        System.out.println("Num: "+num);
+        System.out.println("Guess: "+guess);
 //        System.out.println("# of ships: "+ships.size());
 
-        for(String x : gCoord){
+        for(Coordinate x : gCoord){
             //System.out.println("guess = gCord: "+guess.equals(x));
-            if(guess.equals(x)){
+            if(guess.equals(x.getName())){
                 return "already guessed";
             }
         }
@@ -576,7 +526,7 @@ public class Main {
 //        System.out.println(guess);
 //        System.out.println("gCoord: "+gCoord);
 
-        gCoord.add(guess);
+        gCoord.add(new Coordinate(guess));
 
         for(Ship x : ships){
             for(String y : x.getCoordinates()){
@@ -601,45 +551,112 @@ public class Main {
         return "miss";
     }
 
-    public static String enemyTurn(String[][] grid, ArrayList<Ship> ships, ArrayList<String> gCoord, ArrayList<Coordinate> cCoord){
-        String coordinate;
-        String randLetter;
-        String randNum;
+    public static String enemyTurn(String[][] grid, ArrayList<Ship> ships, ArrayList<Coordinate> gCoord, ArrayList<Coordinate> cCoord){
         String randDir;
-        String guess;
+        String guess = "";
         String guessVal = "";
+
+        boolean guessing = true;
 
         ArrayList<String> directions = new ArrayList<String>();
 
         int letter;
         int num;
 
+        System.out.println("cCoord.size(): "+cCoord.size());
+        System.out.print("gCoord: ");
+        for(Coordinate x : gCoord){
+            System.out.print(x.getName()+", ");
+        }
+        System.out.println("\n");
+
         //Guess randomly until a ship is found
         if(cCoord.size() == 0){
-            int[] randCoordinate = randomCoordinate();
-//            System.out.println("randLetter: "+randCoordinate[0]);
-//            System.out.println("randNum: "+randCoordinate[1]);
+            Coordinate randCoord = new Coordinate();
+            while(guessing){
+                guessing = false;
 
-            randLetter = alphabet.substring(randCoordinate[0],randCoordinate[0]+1);
-            randNum = Integer.toString(randCoordinate[1]);
-            guess = randLetter+randNum;
+                System.out.println("yes");
 
-            System.out.println("Enemy randGuess: "+guess);
+                int[] randomCoordinate = randomCoordinate();
+
+                randCoord = new Coordinate(randomCoordinate[0], randomCoordinate[1]+1);
+                guess = randCoord.getName();
+
+                for(Coordinate x : gCoord){
+                    if(guess.equals(x.getName())){
+                        guessing = true;
+                    }
+                }
+            }
 
             guessVal = checkGuess(guess, grid, grid, ships, gCoord);
 
+//            System.out.println(randomCoordinate[0]+", "+randomCoordinate[1]);
+//            System.out.println("name: "+randCoord.getName());
+//            System.out.println("letter: "+randCoord.getLetter());
+//            System.out.println("num: "+randCoord.getNum());
+
+            System.out.println("Enemy randGuess: "+guess);
+
             if(guessVal.equals("hit")){
-                cCoord.add(new Coordinate(guess));
+                cCoord.add(randCoord);
             }
+
         }else{
-            Coordinate randCoord = cCoord.get((int)(Math.random() * cCoord.size()));
-            letter = alphabet.indexOf(randCoord.getName().substring(0,1));
-            num = Integer.parseInt(randCoord.getName().substring(1));
+//            while(guessing){
+//
+//            }
+            Coordinate c = cCoord.get((int)(Math.random() * cCoord.size()));
+            Coordinate g;
+            letter = c.getLetter();
+            num = c.getNum();
 
-            directions = getDirections(letter, num);
-
+            directions = c.getDirections(letter, num-1);
             randDir = directions.get((int)(Math.random() * directions.size()));
 
+            int newLetter = 0;
+            int newNum = 0;
+
+            System.out.println("OG coord: "+c.getName());
+            System.out.println("Directions: "+directions);
+
+            if(randDir.equals("up")){
+                System.out.println("up");
+
+                newLetter = c.getLetter() - 1;
+                newNum = c.getNum();
+
+                g = new Coordinate(newLetter, newNum);
+            }
+            if(randDir.equals("down")){
+                System.out.println("down");
+
+                newLetter = c.getLetter() + 1;
+                newNum = c.getNum();
+            }
+            if(randDir.equals("left")){
+                System.out.println("left");
+
+                newLetter = c.getLetter();
+                newNum = c.getNum() - 1;
+            }
+            if(randDir.equals("right")){
+                System.out.println("right");
+
+                newLetter = c.getLetter();
+                newNum = c.getNum() + 1;
+            }
+
+            g = new Coordinate(newLetter, newNum);
+            guess = g.getName();
+
+            System.out.println("Enemy educatedGuess: "+guess);
+            guessVal = checkGuess(guess, grid, grid, ships, gCoord);
+
+            if(guessVal.equals("hit")){
+                cCoord.add(g);
+            }
         }
 
         return guessVal;
