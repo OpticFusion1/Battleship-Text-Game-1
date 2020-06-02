@@ -14,9 +14,15 @@ public class Main {
 
         ArrayList<Ship> ships = new ArrayList<Ship>();
         ArrayList<Ship> shipsE = new ArrayList<Ship>();
+
+        //Coordinates guessed during the game
         ArrayList<Coordinate> guessedCoord = new ArrayList<Coordinate>();
         ArrayList<Coordinate> guessedCoordE = new ArrayList<Coordinate>();
         ArrayList<Coordinate> correctCoordE = new ArrayList<Coordinate>();
+
+        Ship guessShip = new Ship();
+
+        //Coordinates used to place the ships
         ArrayList<String> usedCoord = new ArrayList<String>();
         ArrayList<String> usedCoordE = new ArrayList<String>();
 
@@ -27,11 +33,11 @@ public class Main {
         boolean notDebugging = false;
         boolean choosing = notDebugging;
         boolean playing = true;
-        boolean turn = false;
 
         int shipsLeft = 5;
         int shipsLeftE = 5;
         int enemyTurns = 0;
+        int turn = 1;
 
         String guessVal = "";
 
@@ -43,10 +49,10 @@ public class Main {
         //Skip choosing
         choosing = notDebugging;
         Ship t1 = createShip("A1,A2", grid, returnCoordinates("A1,A2", usedCoord));
-        Ship t2 = createShip("B1,B3", grid, returnCoordinates("B1,B3", usedCoord));
-        Ship t3 = createShip("C1,C3", grid, returnCoordinates("C1,C3", usedCoord));
-        Ship t4 = createShip("D1,D4", grid, returnCoordinates("D1,D4", usedCoord));
-        Ship t5 = createShip("E1,E5", grid, returnCoordinates("E1,E5", usedCoord));
+        Ship t2 = createShip("A5,C5", grid, returnCoordinates("A5,C5", usedCoord));
+        Ship t3 = createShip("E1,E3", grid, returnCoordinates("E1,E3", usedCoord));
+        Ship t4 = createShip("I5,I8", grid, returnCoordinates("I5,I8", usedCoord));
+        Ship t5 = createShip("C8,G8", grid, returnCoordinates("C8,G8", usedCoord));
         ships.add(t1);
         ships.add(t2);
         ships.add(t3);
@@ -119,6 +125,7 @@ public class Main {
             }
         }
 
+        //Randomizing enemy ships
         Ship e1 = randomizeEnemyShip(gridE, 2, usedCoordE);
         shipsE.add(e1);
         Ship e2 = randomizeEnemyShip(gridE, 3, usedCoordE);
@@ -133,18 +140,22 @@ public class Main {
         //Game loop
         while(playing){
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("<<TURN "+turn+">>");
+
             System.out.println("Your board:");
             showGrid(grid);
-//            System.out.println("Enemy Board: ");
-//            showGrid(gridH);
+            System.out.println("Enemy Board: ");
+            showGrid(gridH);
 
 //            System.out.println("ENEMY (DEBUG) BOARD: ");
 //            showGrid(gridE);
 
-            /**
+
             //Player turn
             System.out.print("\nType your guess: ");
             input = scan.nextLine();
+
+            System.out.println("");
 
             //miss (0), hit(1), already guessed(2), sunk(3)
             guessVal = checkGuess(input, gridE, gridH, shipsE, guessedCoord);
@@ -169,21 +180,33 @@ public class Main {
                 }
             }
 
-            System.out.println("[PRESS ENTER TO CONTINUE]");
+            System.out.println("\n[PRESS ENTER TO CONTINUE]");
             scan.nextLine();
-            **/
-
-
-            //Enemy turn
 
             //EnemyAI debugging loop
-            for(int i = 1; i <= 5; i++){
-                System.out.println("<<Turn: "+i+">>");
-                enemyTurn(grid, ships, guessedCoordE, correctCoordE);
-                showGrid(grid);
+//            for(int i = 1; i <= 10; i++){
+//                enemyTurn(grid, ships, guessedCoordE, correctCoordE, guessShip);
+//                showGrid(grid);
+//            }
+
+            //Enemy turn
+            guessVal = enemyTurn(grid, ships, guessedCoordE, correctCoordE, guessShip);
+
+            System.out.println("\n[PRESS ENTER TO CONTINUE]");
+            scan.nextLine();
+
+            if(guessVal.equals("ship sunk")){
+                shipsLeft--;
+                if(shipsLeft == 0){
+                    System.out.println("<<YOU LOST THE GAME>>");
+                    System.out.println("\nENEMY BOARD REVEALED: ");
+                    showGrid(gridE);
+                    break;
+                }
             }
 
-            playing = false;
+            turn++;
+            //playing = false;
         }
     }
 
@@ -353,14 +376,14 @@ public class Main {
         while(randomizing){
             int[] randomCoordinate = randomCoordinate();
 
-            Coordinate randCoord = new Coordinate(randomCoordinate[0], randomCoordinate[1]);
-
             randLetter = randomCoordinate[0];
             randNum = randomCoordinate[1];
 
+            Coordinate randCoord = new Coordinate(randLetter, randNum);
+
             boolean checkPassed = false;
 
-            ArrayList<String> possibleDirections = randCoord.getDirections(randLetter, randNum);
+            ArrayList<String> possibleDirections = randCoord.getDirections();
 
 //        System.out.println("randLetter: "+randLetter);
 //        System.out.println("randNum: "+randNum);
@@ -511,9 +534,9 @@ public class Main {
         int letter = alphabet.indexOf(guess.substring(0,1));
         int num = Integer.parseInt(guess.substring(1));
 
-        System.out.println("Letter: "+letter);
-        System.out.println("Num: "+num);
-        System.out.println("Guess: "+guess);
+//        System.out.println("Letter: "+letter);
+//        System.out.println("Num: "+num);
+//        System.out.println("Guess: "+guess);
 //        System.out.println("# of ships: "+ships.size());
 
         for(Coordinate x : gCoord){
@@ -539,7 +562,6 @@ public class Main {
                         return "ship sunk";
 
                     }
-
                     return "hit";
 
                 }else{
@@ -551,114 +573,256 @@ public class Main {
         return "miss";
     }
 
-    public static String enemyTurn(String[][] grid, ArrayList<Ship> ships, ArrayList<Coordinate> gCoord, ArrayList<Coordinate> cCoord){
-        String randDir;
+    public static String enemyTurn(String[][] grid, ArrayList<Ship> ships, ArrayList<Coordinate> gCoord, ArrayList<Coordinate> cCoord, Ship guessShip){
+        String randDir = "";
         String guess = "";
         String guessVal = "";
 
-        boolean guessing = true;
-
         ArrayList<String> directions = new ArrayList<String>();
+        Coordinate c = new Coordinate(); //original coordinate
+        Coordinate randCoord = new Coordinate();
 
         int letter;
         int num;
+        int sameCoord = 0;
+        int error = 0;
+        boolean guessing = true;
 
-        System.out.println("cCoord.size(): "+cCoord.size());
-        System.out.print("gCoord: ");
-        for(Coordinate x : gCoord){
-            System.out.print(x.getName()+", ");
-        }
-        System.out.println("\n");
+//        System.out.println("cCoord.size(): "+cCoord.size());
+//        System.out.print("gCoord: ");
+//        for(Coordinate x : gCoord){
+//            System.out.print(x.getName()+", ");
+//        }
+//        System.out.println("\n");
 
         //Guess randomly until a ship is found
-        if(cCoord.size() == 0){
-            Coordinate randCoord = new Coordinate();
-            while(guessing){
-                guessing = false;
+        while(guessing) {
+            guessing = false;
+            sameCoord = 0;
 
-                System.out.println("yes");
-
+            if (cCoord.size() == 0) {
                 int[] randomCoordinate = randomCoordinate();
+                letter = randomCoordinate[0];
+                num = randomCoordinate[1] + 1;
 
-                randCoord = new Coordinate(randomCoordinate[0], randomCoordinate[1]+1);
-                guess = randCoord.getName();
+                randCoord = new Coordinate(letter, num);
 
-                for(Coordinate x : gCoord){
-                    if(guess.equals(x.getName())){
-                        guessing = true;
+                for (Coordinate x : gCoord) {
+                    if (randCoord.getName().equals(x.getName())) {
+                        sameCoord++;
                     }
                 }
-            }
 
-            guessVal = checkGuess(guess, grid, grid, ships, gCoord);
+                //directions = randomDirections(randCoord, guessShip);
+                guess = randCoord.getName();
 
 //            System.out.println(randomCoordinate[0]+", "+randomCoordinate[1]);
 //            System.out.println("name: "+randCoord.getName());
 //            System.out.println("letter: "+randCoord.getLetter());
 //            System.out.println("num: "+randCoord.getNum());
 
-            System.out.println("Enemy randGuess: "+guess);
+                //System.out.println("Enemy randGuess: " + guess);
 
-            if(guessVal.equals("hit")){
-                cCoord.add(randCoord);
+            }else {
+                if(guessShip.getAlignment().equals("unknown")){
+                    c = cCoord.get((int) (Math.random() * cCoord.size()));
+                }else{
+                    int pickRandom = (int)(Math.random() * 2);
+                    System.out.println("pickRandom: "+pickRandom);
+                    if(pickRandom == 0){
+                        c = cCoord.get(0);
+                    }else{
+                        c = cCoord.get(cCoord.size()-1);
+                    }
+                }
+
+                letter = c.getLetter();
+                num = c.getNum();
+
+                for (Coordinate x : gCoord) {
+                    if (c.getName().equals(x.getName())) {
+                        sameCoord++;
+                    }
+                }
+
+                directions = randomDirections(c, guessShip);
+
+//                System.out.println("OG coord: " + c.getName());
+//                System.out.println("Directions: " + directions);
+
+               randDir = directions.get((int) (Math.random() * directions.size()));
+
+                int newLetter = 0;
+                int newNum = 0;
+
+                if (randDir.equals("up")) {
+                    //System.out.println("up");
+
+                    newLetter = c.getLetter() - 1;
+                    newNum = c.getNum();
+                }
+                if (randDir.equals("down")) {
+                    //System.out.println("down");
+
+                    newLetter = c.getLetter() + 1;
+                    newNum = c.getNum();
+                }
+                if (randDir.equals("left")) {
+                    //System.out.println("left");
+
+                    newLetter = c.getLetter();
+                    newNum = c.getNum() - 1;
+                }
+                if (randDir.equals("right")) {
+                    //System.out.println("right");
+
+                    newLetter = c.getLetter();
+                    newNum = c.getNum() + 1;
+                }
+
+                randCoord = new Coordinate(newLetter, newNum);
+                randCoord.findDirections(newLetter, newNum);
+                guess = randCoord.getName();
+
+                //System.out.println("Enemy educatedGuess: " + guess);
             }
 
-        }else{
-//            while(guessing){
-//
-//            }
-            Coordinate c = cCoord.get((int)(Math.random() * cCoord.size()));
-            Coordinate g;
-            letter = c.getLetter();
-            num = c.getNum();
+            sameCoord = 0;
 
-            directions = c.getDirections(letter, num-1);
-            randDir = directions.get((int)(Math.random() * directions.size()));
-
-            int newLetter = 0;
-            int newNum = 0;
-
-            System.out.println("OG coord: "+c.getName());
-            System.out.println("Directions: "+directions);
-
-            if(randDir.equals("up")){
-                System.out.println("up");
-
-                newLetter = c.getLetter() - 1;
-                newNum = c.getNum();
-
-                g = new Coordinate(newLetter, newNum);
-            }
-            if(randDir.equals("down")){
-                System.out.println("down");
-
-                newLetter = c.getLetter() + 1;
-                newNum = c.getNum();
-            }
-            if(randDir.equals("left")){
-                System.out.println("left");
-
-                newLetter = c.getLetter();
-                newNum = c.getNum() - 1;
-            }
-            if(randDir.equals("right")){
-                System.out.println("right");
-
-                newLetter = c.getLetter();
-                newNum = c.getNum() + 1;
+            for (Coordinate x : gCoord) {
+                if (guess.equals(x.getName())) {
+                    //System.out.println("REPEAT: "+guess);
+                    guessing = true;
+                    sameCoord++;
+                    error++;
+                }
             }
 
-            g = new Coordinate(newLetter, newNum);
-            guess = g.getName();
+            if(error > 5){
+                System.out.println("<<ERROR>>");
+                break;
+            }
 
-            System.out.println("Enemy educatedGuess: "+guess);
+        }
+
+        if(sameCoord == 0){
             guessVal = checkGuess(guess, grid, grid, ships, gCoord);
+            System.out.println("<<The enemy guessed "+guess+">>");
+//            System.out.println("randCoord position: "+randCoord.getPosition());
+//            System.out.println("directions: "+randCoord.getDirections());
+//            System.out.println("neighbors: "+randCoord.getNeighbors());
+        }
 
-            if(guessVal.equals("hit")){
-                cCoord.add(g);
+        if (guessVal.equals("hit")) {
+            cCoord.add(randCoord);
+
+            System.out.println("<<The enemy hit your ship>>");
+
+            if(randCoord.getAlignment().equals("unknown") && cCoord.size() > 1){
+                findAlignment(c, randCoord, guessShip);
+            }
+
+            //System.out.println("Ship alignment: "+guessShip.getAlignment());
+
+            if(cCoord.size() > 1){
+                Coordinate min;
+
+//                System.out.print("BEFORE SORT: ");
+//                for(Coordinate x : cCoord){
+//                    System.out.print(x.getName()+", ");
+//                }
+
+                if(guessShip.getAlignment().equals("vertical")){
+                    for(int i = 0; i < cCoord.size(); i++){
+                        min = cCoord.get(i);
+
+                        for(int j = i; j < cCoord.size(); j++){
+                            if(cCoord.get(j).getLetter() < min.getLetter()){
+                                min = cCoord.get(j);
+                            }
+                        }
+                        cCoord.remove(min);
+                        cCoord.add(i, min);
+                    }
+                }
+
+                if(guessShip.getAlignment().equals("horizontal")){
+                    for(int i = 0; i < cCoord.size(); i++){
+                        min = cCoord.get(i);
+
+                        for(int j = i; j < cCoord.size(); j++){
+                            if(cCoord.get(j).getNum() < min.getNum()){
+                                min = cCoord.get(j);
+                            }
+                        }
+                        cCoord.remove(min);
+                        cCoord.add(i, min);
+                    }
+                }
+
+//                System.out.print("\nAFTER SORT: ");
+//                for(Coordinate x : cCoord){
+//                    System.out.print(x.getName()+", ");
+//                }
+//                System.out.print("\n");
             }
         }
 
+        if (guessVal.equals("ship sunk")){
+
+            System.out.println("<<The enemy sunk your ship>>");
+
+            cCoord.clear();
+            guessShip.setAlignment("unknown");
+
+        }
+
         return guessVal;
+    }
+
+    public static void findAlignment(Coordinate c, Coordinate g, Ship guessShip){
+        ArrayList<String> directions = c.getDirections();
+        ArrayList<String> neighbors = c.getNeighbors();
+
+        String gName = g.getName();
+
+        int index = neighbors.indexOf(gName);
+        String direction = directions.get(index);
+
+        if(direction.equals("up") || direction.equals("down")){
+            guessShip.setAlignment("vertical");
+        }
+        if(direction.equals("left") || direction.equals("right")){
+            guessShip.setAlignment("horizontal");
+        }
+    }
+
+    public static ArrayList<String> randomDirections(Coordinate c, Ship s){
+        ArrayList<String> newDirections = new ArrayList<String>();
+        ArrayList<String> originalDirections = c.getDirections();
+        ArrayList<String> directions = new ArrayList<String>();
+
+        if(s.getAlignment().equals("unknown")){
+            directions = originalDirections;
+        }else{
+            if(s.getAlignment().equals("vertical")){
+                newDirections.add("up");
+                newDirections.add("down");
+            }
+            if(s.getAlignment().equals("horizontal")){
+                newDirections.add("left");
+                newDirections.add("right");
+            }
+
+            for(String x : newDirections){
+                for(String y : originalDirections){
+                    if(x.equals(y)){
+                        directions.add(x);
+                    }
+                }
+            }
+        }
+
+        return directions;
     }
 }
