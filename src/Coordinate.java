@@ -108,8 +108,7 @@ public class Coordinate {
                 neighbors.add(findName(letter+1,num)); //Down
                 neighbors.add(findName(letter,num-1)); //Left
                 neighbors.add(findName(letter,num+1)); //Right
-            }
-            if(letter == 9){
+            }else if(letter == 9){
                 position = "bottom";
                 possibleDirections.add("up");
                 possibleDirections.add("left");
@@ -118,8 +117,7 @@ public class Coordinate {
                 neighbors.add(findName(letter-1, num)); //Up
                 neighbors.add(findName(letter,num-1)); //Left
                 neighbors.add(findName(letter,num+1)); //Right
-            }
-            if(num == 1){
+            }else if(num == 1){
                 position = "left";
                 possibleDirections.add("up");
                 possibleDirections.add("down");
@@ -128,8 +126,7 @@ public class Coordinate {
                 neighbors.add(findName(letter-1, num)); //Up
                 neighbors.add(findName(letter+1,num)); //Down
                 neighbors.add(findName(letter,num+1)); //Right
-            }
-            if(num == 10){
+            }else if(num == 10){
                 position = "right";
                 possibleDirections.add("up");
                 possibleDirections.add("down");
@@ -149,24 +146,21 @@ public class Coordinate {
 
                 neighbors.add(findName(letter+1,num)); //Down
                 neighbors.add(findName(letter,num+1)); //Right
-            }
-            if(letter == 0 && num == 10){
+            }else if(letter == 0 && num == 10){
                 alignment = "top right";
                 possibleDirections.add("down");
                 possibleDirections.add("left");
 
                 neighbors.add(findName(letter+1,num)); //Down
                 neighbors.add(findName(letter,num-1)); //Left
-            }
-            if(letter == 9 && num == 1){
+            }else if(letter == 9 && num == 1){
                 alignment = "bottom left";
                 possibleDirections.add("up");
                 possibleDirections.add("right");
 
                 neighbors.add(findName(letter-1, num)); //Up
                 neighbors.add(findName(letter,num+1)); //Right
-            }
-            if(letter == 9 && num == 10){
+            }else if(letter == 9 && num == 10){
                 alignment = "bottom right";
                 possibleDirections.add("up");
                 possibleDirections.add("left");

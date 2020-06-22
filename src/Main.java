@@ -30,7 +30,7 @@ public class Main {
         String input = " ";
 
         //Set to false to skip choosing
-        boolean notDebugging = false;
+        boolean notDebugging = true;
         boolean choosing = notDebugging;
         boolean playing = true;
 
@@ -161,16 +161,13 @@ public class Main {
             guessVal = checkGuess(input, gridE, gridH, shipsE, guessedCoord);
             if(guessVal.equals("miss")){
                 System.out.println("<<You didn't hit anything>>");
-            }
-            if(guessVal.equals("hit")){
+            }else if(guessVal.equals("hit")){
                 System.out.println("<<You hit a ship!>>");
 
-            }
-            if(guessVal.equals("already guessed")){
+            }else if(guessVal.equals("already guessed")){
                 System.out.println("<<You already guessed that spot>>");
 
-            }
-            if(guessVal.equals("ship sunk")){
+            }else if(guessVal.equals("ship sunk")){
                 System.out.println("<<You sunk an enemy ship!>>");
 
                 shipsLeftE--;
@@ -628,7 +625,7 @@ public class Main {
                     c = cCoord.get((int) (Math.random() * cCoord.size()));
                 }else{
                     int pickRandom = (int)(Math.random() * 2);
-                    System.out.println("pickRandom: "+pickRandom);
+                    //System.out.println("pickRandom: "+pickRandom);
                     if(pickRandom == 0){
                         c = cCoord.get(0);
                     }else{
@@ -660,20 +657,17 @@ public class Main {
 
                     newLetter = c.getLetter() - 1;
                     newNum = c.getNum();
-                }
-                if (randDir.equals("down")) {
+                }else if (randDir.equals("down")) {
                     //System.out.println("down");
 
                     newLetter = c.getLetter() + 1;
                     newNum = c.getNum();
-                }
-                if (randDir.equals("left")) {
+                }else if (randDir.equals("left")) {
                     //System.out.println("left");
 
                     newLetter = c.getLetter();
                     newNum = c.getNum() - 1;
-                }
-                if (randDir.equals("right")) {
+                }else if (randDir.equals("right")) {
                     //System.out.println("right");
 
                     newLetter = c.getLetter();
