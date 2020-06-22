@@ -48,18 +48,20 @@ public class Main {
 
         //Skip choosing
         choosing = notDebugging;
-        Ship t1 = createShip("A1,A2", grid, returnCoordinates("A1,A2", usedCoord));
-        Ship t2 = createShip("A5,C5", grid, returnCoordinates("A5,C5", usedCoord));
-        Ship t3 = createShip("E1,E3", grid, returnCoordinates("E1,E3", usedCoord));
-        Ship t4 = createShip("I5,I8", grid, returnCoordinates("I5,I8", usedCoord));
-        Ship t5 = createShip("C8,G8", grid, returnCoordinates("C8,G8", usedCoord));
-        ships.add(t1);
-        ships.add(t2);
-        ships.add(t3);
-        ships.add(t4);
-        ships.add(t5);
+//        Ship t1 = createShip("A1,A2", grid, returnCoordinates("A1,A2", usedCoord));
+//        Ship t2 = createShip("A5,C5", grid, returnCoordinates("A5,C5", usedCoord));
+//        Ship t3 = createShip("E1,E3", grid, returnCoordinates("E1,E3", usedCoord));
+//        Ship t4 = createShip("I5,I8", grid, returnCoordinates("I5,I8", usedCoord));
+//        Ship t5 = createShip("C8,G8", grid, returnCoordinates("C8,G8", usedCoord));
+//        ships.add(t1);
+//        ships.add(t2);
+//        ships.add(t3);
+//        ships.add(t4);
+//        ships.add(t5);
 
         System.out.println("To place a ship, insert the two coordinates in this format: A1,A3");
+        showGrid(grid);
+
         while(choosing){
             System.out.print("Place your ship (2 long): ");
             input = scan.nextLine();
@@ -247,8 +249,8 @@ public class Main {
 
         String direction = "";
         int commaIndex = input.indexOf(",");
-        String coord1 = input.substring(0, commaIndex);
-        String coord2 = input.substring(commaIndex+1);
+        String coord1 = input.substring(0, commaIndex).toUpperCase();
+        String coord2 = input.substring(commaIndex+1).toUpperCase();
 
 //        System.out.println("Coord1: "+coord1);
 //        System.out.println("Coord2: "+coord2);
